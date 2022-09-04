@@ -1,12 +1,19 @@
 package br.edu.ifsp.scl.calculadora
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.net.ParseException
 import br.edu.ifsp.scl.calculadora.databinding.ActivityMainBinding
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import kotlin.IllegalArgumentException
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 class MainActivity : AppCompatActivity() {
     private lateinit var activityMainBinding: ActivityMainBinding
@@ -40,6 +47,11 @@ class MainActivity : AppCompatActivity() {
     private val MULTIPLICATION = " × "
     private val DIVISION = " ÷ "
 
+    private val PERCENTAGE = ""
+    private val ROOT = "√"
+    private val SQUARE = "sqr"
+    private val FRACTION = "1/"
+
     private val NEGATE = "negate"
     private val COMMA = ","
     private val EQUAL = " = "
@@ -51,6 +63,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         activityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(activityMainBinding.root)
+        setSupportActionBar(activityMainBinding.mainTb.toolbar)
 
         activityMainBinding.button0.setOnClickListener { onNumberButtonClick(ZERO) }
         activityMainBinding.button1.setOnClickListener { onNumberButtonClick(ONE) }
@@ -156,6 +169,42 @@ class MainActivity : AppCompatActivity() {
             isFutureOperationButtonClicked = false
             isEqualButtonClicked = true
         }
+        activityMainBinding.buttonPercentage.setOnClickListener {
+            onInstantOperationButtonClick(PERCENTAGE)
+        }
+        activityMainBinding.buttonRoot.setOnClickListener {
+            onInstantOperationButtonClick(ROOT)
+        }
+        activityMainBinding.buttonSquare.setOnClickListener {
+            onInstantOperationButtonClick(SQUARE)
+        }
+        activityMainBinding.buttonFraction.setOnClickListener {
+            onInstantOperationButtonClick(FRACTION)
+        }
+
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        R.id.basic -> {
+            val gridLayout = activityMainBinding.gridLayout1
+            gridLayout.visibility = View.GONE
+            true
+        }
+        R.id.advanced -> {
+            val gridLayout = activityMainBinding.gridLayout1
+            val guideline = activityMainBinding.guideline
+            gridLayout.visibility = View.VISIBLE
+            guideline.setGuidelinePercent(0.5f)
+            true
+        }
+        else -> {
+            super.onOptionsItemSelected(item)
+        }
     }
 
     private fun onNumberButtonClick(number: String, isHistory: Boolean = false) {
@@ -205,6 +254,44 @@ class MainActivity : AppCompatActivity() {
 
         isFutureOperationButtonClicked = true
         isEqualButtonClicked = false
+    }
+
+    private fun onInstantOperationButtonClick(operation: String) {
+
+        var currentValue: String = activityMainBinding.numberCurrent.text.toString()
+        var thisOperationNumber: Double = formatStringToDouble(currentValue)
+
+        currentValue = "(${formatDoubleToString(thisOperationNumber)})"
+
+        when (operation) {
+            PERCENTAGE -> {
+                thisOperationNumber = (currentResult * thisOperationNumber) / 100
+                currentValue = formatDoubleToString(thisOperationNumber)
+            }
+            // Later we use this property to find square root of the provided number.
+            ROOT -> thisOperationNumber = sqrt(thisOperationNumber)
+            SQUARE -> thisOperationNumber *= thisOperationNumber
+            FRACTION -> thisOperationNumber = 1 / thisOperationNumber
+        }
+
+        if (isInstantOperationButtonClicked) {
+            historyInstantOperationText = "($historyInstantOperationText)"
+            historyInstantOperationText = StringBuilder().append(operation).append(historyInstantOperationText).toString()
+            activityMainBinding.numberHistory.text = if (isEqualButtonClicked) historyInstantOperationText else StringBuilder().append(historyText).append(currentOperation).append(historyInstantOperationText).toString()
+        } else if (isEqualButtonClicked) {
+            historyInstantOperationText = StringBuilder().append(operation).append(currentValue).toString()
+            activityMainBinding.numberHistory.text = historyInstantOperationText
+        } else {
+            historyInstantOperationText = StringBuilder().append(operation).append(currentValue).toString()
+            activityMainBinding.numberHistory.text = StringBuilder().append(historyText).append(currentOperation).append(historyInstantOperationText).toString()
+        }
+
+        activityMainBinding.numberCurrent.text = formatDoubleToString(thisOperationNumber)
+
+        if (isEqualButtonClicked) currentResult = thisOperationNumber else currentNumber = thisOperationNumber
+
+        isInstantOperationButtonClicked = true
+        isFutureOperationButtonClicked = false
     }
 
     private fun calculateResult(): String {

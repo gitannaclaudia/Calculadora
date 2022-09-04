@@ -6,6 +6,11 @@
         <item name="colorPrimary">@color/colorPrimary</item>
     </style>
 
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
     <style name="CalculatorButton">
         <item name="android:textColor">@color/colorCalculatorButtonsText</item>
         <item name="android:theme">@android:style/ThemeOverlay.Material.Dark</item>

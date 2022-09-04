@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+    android:id="@+id/basic"
+    android:title="@string/calc_basic" />
+
+    <item
+    android:id="@+id/advanced"
+    android:title="@string/calc_advanced" />
+</menu>
